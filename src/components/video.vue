@@ -2,7 +2,9 @@
   <main
     class="bg-black overflow-hidden flex items-center justify-center"
   >
-    <canvas ref="imageCanvas" class="w-full h-full object-contain" />
+    <canvas
+      ref="imageCanvas"
+      class="w-full h-full object-contain border " />
   </main>
 </template>
 <script setup lang="ts">
