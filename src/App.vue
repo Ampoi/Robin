@@ -23,7 +23,8 @@
             class="absolute bottom-0 left-1/2 -translate-x-1/2"/>
         </div>
       </div>
-      <Stick/>
+      <Stick
+        v-model:position="leftStickPosition"/>
     </div>
     <div class="grow flex flex-col gap-2 items-center">
       <TopicNameSelector
@@ -57,7 +58,8 @@
             class="absolute bottom-0 left-1/2 -translate-x-1/2"/>
         </div>
       </div>
-      <Stick/>
+      <Stick
+        v-model:position="rightStickPosition"/>
     </div>
   </main>
 </template>
@@ -66,14 +68,24 @@ import CircleButton from "./components/circleButton.vue";
 import TriggerButton from "./components/triggerButton.vue";
 import Stick from "./components/stick.vue";
 
-import { ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import { createRos } from "./api/ros.ts"
 import TopicNameSelector from "./components/topicNameSelector.vue";
 import Video from "./components/video.vue"
-import DebugConsole from "./components/debgConsole.vue";
+
 const { ros } = createRos()
 const videoTopicName = ref("")
 const debugConsoleTopicName = ref("")
+
+const leftStickPosition = reactive({
+  x: 0,
+  y: 0
+})
+
+const rightStickPosition = reactive({
+  x: 0,
+  y: 0
+})
 
 function buttonPressed( name: string ){
   console.log(name)

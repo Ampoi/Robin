@@ -28,6 +28,11 @@ let isDragging = false;
 let offsetX = 0;
 let offsetY = 0;
 
+const _position = defineModel<{
+  x: number,
+  y: number
+}>("position", { required: true })
+
 const originalPosition = {
   top: 0,
   left: 0
@@ -60,11 +65,11 @@ function onControl(clientX: number, clientY: number){
   if( !dragElement.parentElement ) throw new Error("stick element parent not found");
   const containerRect = dragElement.parentElement.getBoundingClientRect();
 
-  const newLeft = clientX - containerRect.left - offsetX;
-  const newTop = clientY - containerRect.top - offsetY;
+  _position.value.x = clientX - containerRect.left - offsetX;
+  _position.value.y = clientY - containerRect.top - offsetY;
   
-  dragElement.style.left = newLeft + 'px';
-  dragElement.style.top = newTop + 'px';
+  dragElement.style.left = _position.value.x + 'px';
+  dragElement.style.top = _position.value.y + 'px';
 }
 
 function onControlEnd(){
