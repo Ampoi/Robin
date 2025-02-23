@@ -42,7 +42,7 @@ const { ros, videoTopicName } = defineProps<{
   videoTopicName: string
 }>();
 
-const imageTopic =computed(() => {
+const imageTopic = computed(() => {
   return new RosLib.Topic({
     ros: ros,
     name: videoTopicName,
@@ -58,28 +58,19 @@ onMounted(() => {
       const { width, height } = message;
       imageCanvas.value.width = width;
       imageCanvas.value.height = height;
-      const generator = base64ToBitesGenerator(message.data);
       const ctx = imageCanvas.value.getContext("2d");
       if (!ctx) throw new Error("ctx is null");
       const imageData = ctx.createImageData(width, height);
-  
-      let i = 0;
-      function putBitColor(a: number) {
-        const { value, done } = generator.next();
-        if (done) return true;
-        imageData.data[a] = value;
-        return false;
+
+      const binaryString = atob(message.data);
+      const totalPixels = width * height;
+      for (let i = 0, j = 0; i < totalPixels * 3; i += 3, j += 4) {
+        imageData.data[j] = binaryString.charCodeAt(i);
+        imageData.data[j + 1] = binaryString.charCodeAt(i + 1);
+        imageData.data[j + 2] = binaryString.charCodeAt(i + 2);
+        imageData.data[j + 3] = 255;
       }
-  
-      while (true) {
-        const done1 = putBitColor(i);
-        const done2 = putBitColor(i + 1);
-        const done3 = putBitColor(i + 2);
-        imageData.data[i + 3] = 255;
-        if (done1 || done2 || done3) break;
-        i += 4;
-      }
-  
+
       ctx.putImageData(imageData, 0, 0);
     });
   }, { immediate: true })
