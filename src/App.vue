@@ -3,9 +3,6 @@
     <div class="flex flex-col gap-4 items-center basis-32">
       <div class="p-2 flex flex-col gap-4 w-full">
         <TriggerButton
-          name="LT"
-          class="w-full"/>
-        <TriggerButton
           name="LB"
           class="w-full -mt-2"/>
         <div class="relative w-full aspect-square">
@@ -29,7 +26,8 @@
     <div class="grow flex flex-col gap-2 items-center">
       <TopicNameSelector
         v-model="videoTopicName"
-        :ros/>
+        :ros
+        :isVideo="true"/>
       <Video
         :ros
         :videoTopicName
@@ -37,9 +35,6 @@
     </div>
     <div class="flex flex-col gap-4 items-center basis-32">
       <div class="p-2 flex flex-col gap-4 w-full">
-        <TriggerButton
-          name="RT"
-          class="w-full"/>
         <TriggerButton
           name="RB"
           class="w-full -mt-2"/>

@@ -4,9 +4,7 @@
       <div class="absolute -top-1 h-full w-full rounded-lg border border-white bg-black grid place-content-center">
         <span class="font-mono text-white text-sm">{{ name }}</span>
       </div>
-      <div class="h-full w-full rounded-lg border border-white border-dotted">
-        
-      </div>
+      <div class="h-full w-full rounded-lg border border-white border-dotted"/>
     </div>
   </div>
 </template>

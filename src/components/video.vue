@@ -29,14 +29,6 @@ interface Message {
   is_bigendian: number;
 }
 
-function* base64ToBitesGenerator(base64: string) {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  for (let i = 0; i < len; i++) {
-    yield binaryString.charCodeAt(i);
-  }
-}
-
 const { ros, videoTopicName } = defineProps<{
   ros: RosLib.Ros;
   videoTopicName: string
