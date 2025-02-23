@@ -63,11 +63,12 @@ onMounted(() => {
       const imageData = ctx.createImageData(width, height);
 
       const binaryString = atob(message.data);
+      const pixelColorBrightnesses = Array.from(binaryString).map(char => char.charCodeAt(0));
       const totalPixels = width * height;
       for (let i = 0, j = 0; i < totalPixels * 3; i += 3, j += 4) {
-        imageData.data[j] = binaryString.charCodeAt(i);
-        imageData.data[j + 1] = binaryString.charCodeAt(i + 1);
-        imageData.data[j + 2] = binaryString.charCodeAt(i + 2);
+        imageData.data[j]     = pixelColorBrightnesses[i];
+        imageData.data[j + 1] = pixelColorBrightnesses[i+1];
+        imageData.data[j + 2] = pixelColorBrightnesses[i+2];
         imageData.data[j + 3] = 255;
       }
 
