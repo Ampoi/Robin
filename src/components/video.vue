@@ -35,12 +35,21 @@ const { ros, videoTopicName } = defineProps<{
   videoTopicName: string
 }>();
 
-const imageTopic = computed(() => {
+async function getTopic(){
+  const messageType = await new Promise<string>((resolve) => ros.getTopicType(videoTopicName, resolve))
   return new RosLib.Topic({
     ros: ros,
     name: videoTopicName,
-    messageType: "sensor_msgs/msg/Image",
+    messageType
   })
+}
+
+const imageTopic = ref<RosLib.Topic>()
+watch([
+  () => ros, 
+  () => videoTopicName
+], async () => {
+  imageTopic.value = await getTopic()
 })
 
 //何個に1個だけ処理するかの数値、自然数
@@ -93,7 +102,8 @@ onMounted(async () => {
   drawCameraImage(testMessage)
   console.timeEnd("testDraw")
   watch(imageTopic, (topic) => {
+    if( !topic ) return
     topic.subscribe(drawCameraImage);
-  }, { immediate: true })
+  })
 });
 </script>

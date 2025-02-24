@@ -50,7 +50,7 @@
 import { Icon } from "@iconify/vue"
 import RosLib from "roslib";
 import { Dialog, DialogPanel } from "@headlessui/vue";
-import { onMounted, computed, reactive, watch, ref } from "vue";
+import { onMounted, reactive, watch, ref } from "vue";
 import TriggerButton from "./triggerButton.vue";
 import TopicNameSelector from "./topicNameSelector.vue";
 
@@ -61,12 +61,14 @@ const { ros } = defineProps<{
     ros: RosLib.Ros
 }>()
 
-const topic = computed(() => {
-    return new RosLib.Topic({
-        name: topicName.value,
-        ros,
-        messageType: "*"
-    })
+const topic = ref<RosLib.Topic>()
+watch(topicName, async (newTopicName) => {
+  const messageType = await new Promise<string>((resolve) => ros.getTopicType(newTopicName, resolve))
+  return new RosLib.Topic({
+    name: newTopicName,
+    ros,
+    messageType
+  })
 })
 
 const logs = reactive<string[]>([])
@@ -80,9 +82,10 @@ watch(logs, () => {
 
 onMounted(() => {
   watch(topic, (topicSubscriber) => {
+    if( !topicSubscriber ) return
     topicSubscriber.subscribe((message) => {
       logs.unshift(JSON.stringify(message))
     })
-  }, { immediate: true })
+  })
 })
 </script>
