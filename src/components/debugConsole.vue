@@ -69,16 +69,7 @@ const topic = computed(() => {
     })
 })
 
-const logs = reactive<string[]>([
-  "This is a demo log",
-  "Another demo log",
-  "Yet another demo log",
-  "super long ultra hiper long iaowefjiaowfeiawiawiojefjioawfeijawjiawieofjaiowfejioajioewiojaeijofiajofjieoawijofeijoaijofweawofejaioejfiaoeifjawoiefoiajwoejiaiojofwaoifioj log"
-])
-
-setInterval(() => {
-  logs.unshift("This is a demo log" + Math.random())
-}, 1000)
+const logs = reactive<string[]>([])
 
 const maxLogAmount = 100
 watch(logs, () => {
