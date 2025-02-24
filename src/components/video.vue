@@ -1,10 +1,9 @@
 <template>
   <main
-    class="bg-black overflow-hidden flex items-center justify-center"
-  >
+    class="bg-black overflow-hidden flex items-center justify-center w-full">
     <canvas
       ref="imageCanvas"
-      class="w-full h-full object-contain border " />
+      class="w-full h-full object-contain border" />
   </main>
 </template>
 <script setup lang="ts">
