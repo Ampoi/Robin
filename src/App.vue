@@ -1,6 +1,6 @@
 <template>
   <main class="flex flex-row gap-4 p-4 bg-black w-screen h-screen">
-    <div class="flex flex-col gap-4 items-center basis-32">
+    <div class="flex flex-col gap-4 items-center basis-40">
       <div class="p-2 flex flex-col gap-4 w-full">
         <TriggerButton
           name="LB"
@@ -40,7 +40,7 @@
       <DebugConsole
         :ros/>
     </div>
-    <div class="flex flex-col gap-4 items-center basis-32">
+    <div class="flex flex-col gap-4 items-center basis-40">
       <div class="p-2 flex flex-col gap-4 w-full">
         <TriggerButton
           name="RB"
