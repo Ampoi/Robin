@@ -33,6 +33,19 @@ const _position = defineModel<{
   y: number
 }>("position", { required: true })
 
+const THRESHOLD = 50 //px
+
+function updatePosition(x: number, y: number){
+  const distance = Math.sqrt(x * x + y * y);
+  if (distance > THRESHOLD) {
+    _position.value.x = x / distance;
+    _position.value.y = y / distance;
+  } else {
+    _position.value.x = x / THRESHOLD;
+    _position.value.y = y / THRESHOLD;
+  }
+}
+
 const originalPosition = {
   top: 0,
   left: 0
@@ -48,7 +61,6 @@ const stickElement = ref<HTMLDivElement>();
 
 function onControlStart(clientX: number, clientY: number){
   isDragging = true;
-  console.log(isDragging)
   if( !stickElement.value ) throw new Error("stick element not found");
   const dragElement = stickElement.value;
   const rect = dragElement.getBoundingClientRect();
@@ -65,11 +77,13 @@ function onControl(clientX: number, clientY: number){
   if( !dragElement.parentElement ) throw new Error("stick element parent not found");
   const containerRect = dragElement.parentElement.getBoundingClientRect();
 
-  _position.value.x = clientX - containerRect.left - offsetX;
-  _position.value.y = clientY - containerRect.top - offsetY;
+  updatePosition(
+    clientX - containerRect.left - offsetX,
+    clientY - containerRect.top - offsetY
+  )
   
-  dragElement.style.left = _position.value.x + 'px';
-  dragElement.style.top = _position.value.y + 'px';
+  dragElement.style.left = _position.value.x * THRESHOLD + 'px';
+  dragElement.style.top = _position.value.y * THRESHOLD + 'px';
 }
 
 function onControlEnd(){
@@ -81,6 +95,7 @@ function onControlEnd(){
   dragElement.style.transition = 'left 0.3s ease, top 0.3s ease';
   dragElement.style.left = originalPosition.left + 'px';
   dragElement.style.top = originalPosition.top + 'px';
+  updatePosition(0, 0);
 }
 
 function mouseHandler(handler: (clientX: number, clientY: number) => void){
