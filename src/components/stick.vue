@@ -104,9 +104,21 @@ function mouseHandler(handler: (clientX: number, clientY: number) => void){
   }
 }
 
+function getTouchDistance( touch: Touch ){
+  if( !stickElement.value ) throw new Error("stick element not found");
+  const dragElement = stickElement.value;
+  if( !dragElement.parentElement ) throw new Error("stick element parent not found");
+  const containerRect = dragElement.parentElement.getBoundingClientRect();
+  return Math.hypot(
+    touch.clientX - containerRect.left - offsetX,
+    touch.clientY - containerRect.top - offsetY
+  )
+}
+
 function touchHandler(handler: (clientX: number, clientY: number) => void){
   return (e: TouchEvent) => {
-    handler(e.touches[0].clientX, e.touches[0].clientY);
+    const touch = Array.from(e.touches).sort((a, b) => getTouchDistance(a) - getTouchDistance(b))[0];
+    handler(touch.clientX, touch.clientY);
   }
 }
 </script>
