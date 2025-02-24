@@ -68,7 +68,6 @@ function drawCameraImage(_message: RosLib.Message){
   const binaryString = atob(testBase64);
   const convertedArray = convert(binaryString, width, height, PIXEL_MODULO)
   const clampedArray = new Uint8ClampedArray(convertedArray);
-  console.log(convertedArray.length, width * height)
   const imageData = new ImageData(clampedArray, width, height)
   ctx.putImageData(imageData, 0, 0);
 }
