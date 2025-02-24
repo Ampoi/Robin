@@ -1,17 +1,26 @@
 <template>
   <div>
-    <div class="relative size-8">
-      <div class="absolute -top-1 h-full w-full rounded-full border border-white bg-black grid place-content-center">
+    <button
+      @touchstart="isButtonPressed = true"
+      @touchcancel="isButtonPressed = false"
+      @touchend="isButtonPressed = false"
+      class="relative size-8">
+      <div
+        :class="{
+          'bg-white text-black': isButtonPressed,
+          'bg-black text-white': !isButtonPressed
+        }"
+        class="absolute -top-1 h-full w-full rounded-full border border-white grid place-content-center">
         <Icon
           v-if="icon"
           :icon
-          class="text-white text-sm"/>
+          class="text-sm"/>
         <span
           v-else
-          class="font-mono text-white text-sm">{{ name }}</span>
+          class="font-mono text-sm">{{ name }}</span>
       </div>
       <div class="h-full w-full rounded-full border border-white border-dotted"/>
-    </div>
+    </button>
   </div>
 </template>
 <script setup lang="ts">
@@ -21,6 +30,8 @@ import { computed } from 'vue';
 const { name } = defineProps<{
   name: string
 }>()
+
+const isButtonPressed = defineModel<boolean>("clicked", { required: false })
 
 const icon = computed(() => {
   return ({

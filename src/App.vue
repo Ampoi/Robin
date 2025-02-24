@@ -4,24 +4,29 @@
       <div class="p-2 flex flex-col gap-4 w-full">
         <TriggerButton
           name="LB"
+          v-model:clicked="controls.LB"
           class="w-full -mt-2"/>
         <div class="relative w-full aspect-square">
           <CircleButton
+            v-model:clicked="controls.UP"
             name="↑"
             class="absolute top-0 left-1/2 -translate-x-1/2"/>
           <CircleButton
+            v-model:clicked="controls.LEFT"
             name="←"
             class="absolute top-1/2 -translate-y-1/2 left-0"/>
           <CircleButton
+            v-model:clicked="controls.RIGHT"
             name="→"
             class="absolute top-1/2 -translate-y-1/2 right-0"/>
           <CircleButton
+            v-model:clicked="controls.DOWN"
             name="↓"
             class="absolute bottom-0 left-1/2 -translate-x-1/2"/>
         </div>
       </div>
       <Stick
-        v-model:position="leftStickPosition"/>
+        v-model:position="controls.leftStick"/>
     </div>
     <div class="grow flex flex-col gap-2 items-center">
       <TopicNameSelector
@@ -37,24 +42,29 @@
       <div class="p-2 flex flex-col gap-4 w-full">
         <TriggerButton
           name="RB"
+          v-model:clicked="controls.RB"
           class="w-full -mt-2"/>
         <div class="relative w-full aspect-square">
           <CircleButton
+            v-model:clicked="controls.Y"
             name="Y"
             class="absolute top-0 left-1/2 -translate-x-1/2"/>
           <CircleButton
+            v-model:clicked="controls.X"
             name="X"
             class="absolute top-1/2 -translate-y-1/2 left-0"/>
           <CircleButton
+            v-model:clicked="controls.B"
             name="B"
             class="absolute top-1/2 -translate-y-1/2 right-0"/>
           <CircleButton
+            v-model:clicked="controls.A"
             name="A"
             class="absolute bottom-0 left-1/2 -translate-x-1/2"/>
         </div>
       </div>
       <Stick
-        v-model:position="rightStickPosition"/>
+        v-model:position="controls.rightStick"/>
     </div>
   </main>
 </template>
@@ -63,26 +73,36 @@ import CircleButton from "./components/circleButton.vue";
 import TriggerButton from "./components/triggerButton.vue";
 import Stick from "./components/stick.vue";
 
-import { reactive, ref, watch } from "vue";
+import { reactive, ref } from "vue";
 import { createRos } from "./api/ros.ts"
 import TopicNameSelector from "./components/topicNameSelector.vue";
 import Video from "./components/video.vue"
+import type { Control } from "./model/control.ts";
+import { createControllerTopicInterval } from "./utils/createControllerTopicInterval.ts";
 
 const { ros } = createRos()
 const videoTopicName = ref("")
-const debugConsoleTopicName = ref("")
 
-const leftStickPosition = reactive({
-  x: 0,
-  y: 0
+const controls = reactive<Control>({
+  LB: false,
+  RB: false,
+  A: false,
+  B: false,
+  X: false,
+  Y: false,
+  UP: false,
+  DOWN: false,
+  LEFT: false,
+  RIGHT: false,
+  leftStick: {
+    x: 0,
+    y: 0
+  },
+  rightStick: {
+    x: 0,
+    y: 0
+  }
 })
 
-const rightStickPosition = reactive({
-  x: 0,
-  y: 0
-})
-
-function buttonPressed( name: string ){
-  console.log(name)
-}
+createControllerTopicInterval(ros, 20, controls)
 </script>
