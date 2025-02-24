@@ -43,23 +43,56 @@ const imageTopic = computed(() => {
   })
 })
 
+//何個に1個だけ処理するかの数値、自然数
+const PIXEL_MODULO = 1; //縦横割り切れる値で・そんなに速度改善されない
+const FRAME_MODULO = 1;
+
+let frameCount = -1
+
 function drawCameraImage(_message: RosLib.Message){
+  frameCount += 1
+  if(frameCount % FRAME_MODULO != 0) return
+  frameCount = 0
+
   const message = _message as Message;
-  const { width, height } = message;
+  const { width: _width, height: _height } = message;
+  const width = _width / PIXEL_MODULO
+  const height = _height / PIXEL_MODULO
+
   if (!imageCanvas.value) throw new Error("imageCanvas is undefined");
   imageCanvas.value.width = width;
   imageCanvas.value.height = height;
+  
   const ctx = imageCanvas.value.getContext("2d");
   if (!ctx) throw new Error("ctx is null");
   const binaryString = atob(testBase64);
-  const convertedArray = convert(binaryString, width, height)
+  const convertedArray = convert(binaryString, width, height, PIXEL_MODULO)
   const clampedArray = new Uint8ClampedArray(convertedArray);
+  console.log(convertedArray.length, width * height)
   const imageData = new ImageData(clampedArray, width, height)
   ctx.putImageData(imageData, 0, 0);
 }
 
 onMounted(async () => {
   await init()
+  const testMessage: Message = {
+    width: 640,
+    height: 360,
+    header: {
+      frame_id: "camera",
+      stamp: {
+        sec: 0,
+        nanosec: 0,
+      },
+    },
+    data: testBase64,
+    encoding: "rgb8",
+    step: 0,
+    is_bigendian: 0
+  }
+  console.time("testDraw")
+  drawCameraImage(testMessage)
+  console.timeEnd("testDraw")
   watch(imageTopic, (topic) => {
     topic.subscribe(drawCameraImage);
   }, { immediate: true })
