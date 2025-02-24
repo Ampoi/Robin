@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
+    "build:converter": "cd ./fast-image-converter && wasm-pack build --target web --out-name fast_image_converter --out-dir pkg && cd .. && cp -r fast-image-converter/pkg/* src/api/fast-image-converter",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },

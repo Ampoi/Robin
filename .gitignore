@@ -25,3 +25,4 @@ dist-ssr
 
 dev-dist
 src/assets/testImage.txt
+src/api/fast-image-converter

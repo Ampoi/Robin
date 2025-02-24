@@ -10,6 +10,7 @@
 import { ref, onMounted, watch, computed } from "vue";
 import RosLib from "roslib";
 import testBase64 from '../assets/testImage.txt?raw'
+import init, { convert } from "../api/fast-image-converter/fast_image_converter";
 
 const imageCanvas = ref<HTMLCanvasElement>();
 
@@ -50,22 +51,21 @@ function drawCameraImage(_message: RosLib.Message){
   imageCanvas.value.height = height;
   const ctx = imageCanvas.value.getContext("2d");
   if (!ctx) throw new Error("ctx is null");
-  const imageData = ctx.createImageData(width, height);
-  
+  console.time("AtoB")
   const binaryString = atob(testBase64);
-  const pixelColorBrightnesses = Array.from(binaryString).map(char => char.charCodeAt(0));
-  const totalPixels = width * height;
-  for (let i = 0, j = 0; i < totalPixels * 3; i += 3, j += 4) {
-    imageData.data[j]     = pixelColorBrightnesses[i];
-    imageData.data[j + 1] = pixelColorBrightnesses[i+1];
-    imageData.data[j + 2] = pixelColorBrightnesses[i+2];
-    imageData.data[j + 3] = 255;
-  }
-  
+  console.timeEnd("AtoB")
+  console.time("convert")
+  const convertedArray = convert(binaryString, width, height)
+  console.timeEnd("convert")
+  const clampedArray = new Uint8ClampedArray(convertedArray);
+  const imageData = new ImageData(clampedArray, width, height)
+  console.time("draw")
   ctx.putImageData(imageData, 0, 0);
+  console.timeEnd("draw")
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await init()
   const testMessage: Message = {
     width: 640,
     height: 360,
