@@ -9,7 +9,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import RosLib from "roslib";
-import testBase64 from '../assets/testImage.txt?raw'
 import init, { convert } from "../api/fast-image-converter/fast_image_converter";
 
 const imageCanvas = ref<HTMLCanvasElement>();
@@ -53,7 +52,7 @@ watch([
 })
 
 //何個に1個だけ処理するかの数値、自然数
-const PIXEL_MODULO = 1; //縦横割り切れる値で・そんなに速度改善されない
+const PIXEL_MODULO = 2; //縦横割り切れる値で・そんなに速度改善されない
 const FRAME_MODULO = 1;
 
 let frameCount = -1
@@ -74,7 +73,7 @@ function drawCameraImage(_message: RosLib.Message){
   
   const ctx = imageCanvas.value.getContext("2d");
   if (!ctx) throw new Error("ctx is null");
-  const binaryString = atob(testBase64);
+  const binaryString = atob(message.data);
   const convertedArray = convert(binaryString, width, height, PIXEL_MODULO)
   const clampedArray = new Uint8ClampedArray(convertedArray);
   const imageData = new ImageData(clampedArray, width, height)
@@ -83,24 +82,6 @@ function drawCameraImage(_message: RosLib.Message){
 
 onMounted(async () => {
   await init()
-  const testMessage: Message = {
-    width: 640,
-    height: 360,
-    header: {
-      frame_id: "camera",
-      stamp: {
-        sec: 0,
-        nanosec: 0,
-      },
-    },
-    data: testBase64,
-    encoding: "rgb8",
-    step: 0,
-    is_bigendian: 0
-  }
-  console.time("testDraw")
-  drawCameraImage(testMessage)
-  console.timeEnd("testDraw")
   watch(imageTopic, (topic) => {
     if( !topic ) return
     topic.subscribe(drawCameraImage);

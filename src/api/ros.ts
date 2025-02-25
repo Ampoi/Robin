@@ -1,9 +1,9 @@
 import RosLib from "roslib";
 
-const RosWebsocketUrl = "ws://localhost:9090";
+const RosWebsocketUrl = "ws://192.168.48.189:9090";
 export function createRos() {
   const ros = new RosLib.Ros({
-    url: RosWebsocketUrl,
+    url: RosWebsocketUrl
   });
 
   ros.on("connection", () => {

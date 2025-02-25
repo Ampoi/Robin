@@ -64,7 +64,7 @@ const { ros } = defineProps<{
 const topic = ref<RosLib.Topic>()
 watch(topicName, async (newTopicName) => {
   const messageType = await new Promise<string>((resolve) => ros.getTopicType(newTopicName, resolve))
-  return new RosLib.Topic({
+  topic.value = new RosLib.Topic({
     name: newTopicName,
     ros,
     messageType
@@ -83,6 +83,7 @@ watch(logs, () => {
 onMounted(() => {
   watch(topic, (topicSubscriber) => {
     if( !topicSubscriber ) return
+    
     topicSubscriber.subscribe((message) => {
       logs.unshift(JSON.stringify(message))
     })
