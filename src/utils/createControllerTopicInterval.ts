@@ -1,10 +1,14 @@
 import RosLib from "roslib";
 import type { Control } from "../model/control";
 
+function getDpadValue(a: boolean, b: boolean): number {
+  return a ? (b ? 0 : 1) : (b ? -1 : 0);
+}
+
 function convertControlToJoyMessage(controls: Control): RosLib.Message {
+  const dpadX = getDpadValue(controls.RIGHT, controls.LEFT);
+  const dpadY = getDpadValue(controls.DOWN, controls.UP);
   return {
-    //右がマイナス
-    //上がプラス
     axes: [
       controls.leftStick.x,
       controls.leftStick.y,
@@ -13,20 +17,8 @@ function convertControlToJoyMessage(controls: Control): RosLib.Message {
       0,
       0,
       1,
-      (controls.RIGHT && controls.LEFT)
-        ? 0
-        : controls.RIGHT
-          ? -1
-          : controls.LEFT
-            ? 1
-            : 0,
-      (controls.DOWN && controls.UP)
-        ? 0
-        : controls.DOWN
-          ? -1
-          : controls.UP
-            ? 1
-            : 0,
+      dpadX,
+      dpadY,
     ],
     buttons: [
       controls.A ? 1 : 0,
@@ -44,14 +36,12 @@ function convertControlToJoyMessage(controls: Control): RosLib.Message {
   };
 }
 
-export function createControllerTopicInterval(ros: RosLib.Ros, TPS: number, controls: Control){
-  const joyTopic = new RosLib.Topic({
-    ros,
-    name: "/joy",
-    messageType: "sensor_msgs/Joy",
-  })
+export async function createControllerTopicInterval(ros: RosLib.Ros, TPS: number, controls: Control){
+  const name = "/joy"
+  const messageType = await new Promise<string>(resolve => ros.getTopicType(name, resolve))
+  const joyTopic = new RosLib.Topic({ ros, name, messageType })
+  
   return setInterval(() => {
-    console.log(JSON.stringify(convertControlToJoyMessage(controls)));
     joyTopic.publish(convertControlToJoyMessage(controls));
   }, 1000 / TPS);
 }
