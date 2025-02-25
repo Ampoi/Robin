@@ -39,10 +39,10 @@ function updatePosition(x: number, y: number){
   const distance = Math.sqrt(x * x + y * y);
   if (distance > THRESHOLD) {
     _position.value.x = x / distance;
-    _position.value.y = y / distance;
+    _position.value.y = -y / distance;
   } else {
     _position.value.x = x / THRESHOLD;
-    _position.value.y = y / THRESHOLD;
+    _position.value.y = -y / THRESHOLD;
   }
 }
 
@@ -83,7 +83,7 @@ function onControl(clientX: number, clientY: number){
   )
   
   dragElement.style.left = _position.value.x * THRESHOLD + 'px';
-  dragElement.style.top = _position.value.y * THRESHOLD + 'px';
+  dragElement.style.top = -_position.value.y * THRESHOLD + 'px';
 }
 
 function onControlEnd(){
