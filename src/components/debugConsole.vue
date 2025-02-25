@@ -9,37 +9,34 @@
     </div>
     <p class="min-w-0 shrink max-w-full first-letter:px-2 text-sm font-mono whitespace-nowrap overflow-hidden text-ellipsis">{{ logs[0] }}</p>
   </button>
-  <Dialog
-    :open="isOpen" @close="isOpen = false"
-    class="px-16 py-4 bg-stripe bg-cover fixed z-50 top-0 left-0 w-full h-full">
-    <DialogPanel
-      class="text-white bg-black w-full h-full flex flex-col gap-2 border border-white rounded-2xl p-4">
+  <Modal
+    v-model:open="isOpen"
+    title="Logs">
+    <div
+      v-if="logs.length > 0"
+      class="w-full h-full overflow-x-hidden overflow-y-auto flex flex-col gap-0.5">
       <div
-        v-if="logs.length > 0"
-        class="w-full h-full overflow-x-hidden overflow-y-auto flex flex-col gap-0.5">
-        <div
-          v-for="log in logs"
-          class="border-y text-left border-white border-dotted min-h-6 px-2 text-sm font-mono break-words w-full">
-          {{ log }}
-        </div>
+        v-for="log in logs"
+        class="border-y text-left border-white border-dotted min-h-6 px-2 text-sm font-mono break-words w-full">
+        {{ log }}
       </div>
-      <div
-        v-else
-        class="w-full h-full flex flex-col gap-6 items-center justify-center">
-        <p class="text-4xl font-semibold">No Logs</p>
-      </div>
-      <div class="flex flex-row items-center gap-4 justify-center">
-        <TopicNameSelector
-          :ros
-          :is-video="false"
-          v-model="topicName"/>
-        <TriggerButton
-          @click="isOpen = false"
-          name="CLOSE"
-          class="w-32 translate-y-1"/>
-      </div>
-    </DialogPanel>
-  </Dialog>
+    </div>
+    <div
+      v-else
+      class="w-full h-full flex flex-col gap-6 items-center justify-center">
+      <p class="text-4xl font-semibold">No Logs</p>
+    </div>
+    <div class="flex flex-row items-center gap-4 justify-center">
+      <TopicNameSelector
+        :ros
+        :is-video="false"
+        v-model="topicName"/>
+      <TriggerButton
+        @click="isOpen = false"
+        name="CLOSE"
+        class="w-32 translate-y-1"/>
+    </div>
+  </Modal>
 </template>
 <style>
 .bg-stripe {
@@ -49,10 +46,10 @@
 <script setup lang="ts">
 import { Icon } from "@iconify/vue"
 import RosLib from "roslib";
-import { Dialog, DialogPanel } from "@headlessui/vue";
 import { onMounted, reactive, watch, ref } from "vue";
 import TriggerButton from "./triggerButton.vue";
 import TopicNameSelector from "./topicNameSelector.vue";
+import Modal from "./modal.vue";
 
 const isOpen = ref(false)
 const topicName = ref("")

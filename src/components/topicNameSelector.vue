@@ -16,32 +16,29 @@
       </div>
     </div>
   </button>
-  <Dialog
-    :open="isOpen" @close="isOpen = false"
-    class="px-16 py-4 bg-stripe bg-cover fixed z-50 top-0 left-0 w-full h-full">
-    <DialogPanel
-      class="text-white bg-black w-full h-full border border-white rounded-2xl p-4">
-      <div
-        v-if="topics.length > 0"
-        class="w-full h-full overflow-x-hidden overflow-y-auto flex flex-col gap-2">
-        <button
-          v-for="topic in topics"
-          @click="() => selectTopic(topic)"
-          class="border text-left border-white border-dotted min-h-12 px-4 font-mono overflow-hidden whitespace-nowrap text-ellipsis">
-          {{ topic }}
-        </button>
-      </div>
-      <div
-        v-else
-        class="w-full h-full flex flex-col gap-6 items-center justify-center">
-        <p class="text-4xl font-semibold">No Topics</p>
-        <TriggerButton
-          @click="isOpen = false"
-          name="CLOSE"
-          class="w-32"/>
-      </div>
-    </DialogPanel>
-  </Dialog>
+  <Modal
+    v-model:open="isOpen"
+    title="Select Topic">
+    <div
+      v-if="topics.length > 0"
+      class="w-full h-full overflow-x-hidden overflow-y-auto flex flex-col gap-2">
+      <button
+        v-for="topic in topics"
+        @click="() => selectTopic(topic)"
+        class="border text-left border-white border-dotted min-h-12 px-4 font-mono overflow-hidden whitespace-nowrap text-ellipsis">
+        {{ topic }}
+      </button>
+    </div>
+    <div
+      v-else
+      class="w-full h-full flex flex-col gap-6 items-center justify-center">
+      <p class="text-4xl font-semibold">No Topics</p>
+      <TriggerButton
+        @click="isOpen = false"
+        name="CLOSE"
+        class="w-32"/>
+    </div>
+  </Modal>
 </template>
 <style>
 .bg-stripe {
@@ -52,9 +49,9 @@
 import { Icon } from "@iconify/vue"
 import type { Ros } from "roslib";
 import { useTopics } from "../hooks/useTopics";
-import { Dialog, DialogPanel } from "@headlessui/vue";
 import { ref, watch } from "vue";
 import TriggerButton from "./triggerButton.vue";
+import Modal from "./modal.vue";
 
 const { ros, isVideo } = defineProps<{
   isVideo: boolean
