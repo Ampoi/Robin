@@ -1,7 +1,10 @@
 import RosLib from "roslib";
+import { getLocalStorage } from "../utils/useLocalStorage";
 
-const RosWebsocketUrl = "ws://192.168.48.189:9090";
 export function createRos() {
+  const RosWebsocketUrl = getLocalStorage("WebSocketURL");
+  if( !RosWebsocketUrl ) throw new Error("WebSocketURL not found in LocalStorage");
+  
   const ros = new RosLib.Ros({
     url: RosWebsocketUrl
   });

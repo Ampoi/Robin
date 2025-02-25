@@ -29,14 +29,17 @@
         v-model:position="controls.leftStick"/>
     </div>
     <div class="grow min-w-0 flex flex-col gap-2 items-center">
-      <TopicNameSelector
-        v-model="videoTopicName"
-        :ros
-        :isVideo="true"/>
+      <div class="flex flex-row gap-2">
+        <TopicNameSelector
+          v-model="videoTopicName"
+          :ros
+          :isVideo="true"/>
+        <Settings/>
+      </div>
       <Video
         :ros
         :videoTopicName
-        class="grow"/>
+        class="grow -mt-2"/>
       <DebugConsole
         :ros/>
     </div>
@@ -82,6 +85,7 @@ import Video from "./components/video.vue"
 import type { Control } from "./model/control.ts";
 import { createControllerTopicInterval } from "./utils/createControllerTopicInterval.ts";
 import DebugConsole from "./components/debugConsole.vue";
+import Settings from "./components/settings.vue";
 
 const { ros } = createRos()
 const videoTopicName = ref("")
