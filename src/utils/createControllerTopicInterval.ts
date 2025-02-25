@@ -7,11 +7,11 @@ function convertControlToJoyMessage(controls: Control): RosLib.Message {
     //上がプラス
     axes: [
       controls.leftStick.x,
-      controls.leftStick.y,
-      1,
-      0,
-      controls.rightStick.x,
+      -controls.leftStick.y,
       controls.rightStick.y,
+      controls.rightStick.x,
+      0,
+      0,
       1,
       (controls.RIGHT && controls.LEFT)
         ? 0
