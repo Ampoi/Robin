@@ -51,21 +51,37 @@ watch([
   imageTopic.value = await getTopic()
 })
 
-//何個に1個だけ処理するかの数値、自然数
-const PIXEL_MODULO = 2; //縦横割り切れる値で・そんなに速度改善されない
-const FRAME_MODULO = 1;
-
-let frameCount = -1
-
 function drawCameraImage(_message: RosLib.Message){
-  frameCount += 1
-  if(frameCount % FRAME_MODULO != 0) return
-  frameCount = 0
-
   const message = _message as Message;
-  const { width: _width, height: _height } = message;
-  const width = _width / PIXEL_MODULO
-  const height = _height / PIXEL_MODULO
+  let image_data = message.data
+  
+  let _width = '';
+  let _height = '';
+  
+  let colonCount = 0;
+  let index = 0;
+
+  // 最初の2つのコロンを見つけるまで処理
+  while (index < image_data.length) {
+    let char = image_data[index];
+    
+    if (char === ':') {
+        colonCount++;
+        if (colonCount === 1) {
+            _width = image_data.substring(0, index);
+        } else if (colonCount === 2) {
+            _height = image_data.substring(_width.length + 1, index);
+            break;
+        }
+    }
+    index++;
+  }
+  const width = Number(_width)
+  const height = Number(_height)
+  const image_base64 = image_data.substring(_width.length + _height.length + 2);
+  //const image_base64 = message.data
+  //const width = 500
+  //const height = 500
 
   if (!imageCanvas.value) throw new Error("imageCanvas is undefined");
   imageCanvas.value.width = width;
@@ -73,11 +89,21 @@ function drawCameraImage(_message: RosLib.Message){
   
   const ctx = imageCanvas.value.getContext("2d");
   if (!ctx) throw new Error("ctx is null");
-  const binaryString = atob(message.data);
+  
+  /*const binaryString = atob(message.data);
   const convertedArray = convert(binaryString, width, height, PIXEL_MODULO)
   const clampedArray = new Uint8ClampedArray(convertedArray);
   const imageData = new ImageData(clampedArray, width, height)
-  ctx.putImageData(imageData, 0, 0);
+  ctx.putImageData(imageData, 0, 0);*/
+
+  const img = new Image();
+  img.src = `data:image/jpeg;base64,${image_base64}`;
+  img.onload = () => {
+    if (!imageCanvas.value) throw new Error("imageCanvas is undefined");
+    console.log("draw!")
+    console.log(image_base64)
+    ctx.drawImage(img, 0, 0, imageCanvas.value.width, imageCanvas.value.height)
+  }
 }
 
 onMounted(async () => {
