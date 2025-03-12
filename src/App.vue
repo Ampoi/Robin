@@ -86,6 +86,8 @@ import type { Control } from "./model/control.ts";
 import { createControllerTopicInterval } from "./utils/createControllerTopicInterval.ts";
 import DebugConsole from "./components/debugConsole.vue";
 import Settings from "./components/settings.vue";
+import { onMounted } from "vue";
+import { useLocalStorage } from "./utils/useLocalStorage.ts";
 
 const { ros } = createRos()
 const videoTopicName = ref("")
@@ -108,6 +110,17 @@ const controls = reactive<Control>({
   rightStick: {
     x: 0,
     y: 0
+  }
+})
+
+onMounted(() => {
+  const params = new URLSearchParams(location.search)
+  const newWebSocketURL = params.get("websocket_url")
+  if( newWebSocketURL ){
+    const webSocketURL = useLocalStorage("WebSocketURL")
+    if( webSocketURL.value === newWebSocketURL ) return
+    webSocketURL.value = newWebSocketURL
+    location.reload()
   }
 })
 
