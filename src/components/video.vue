@@ -7,9 +7,8 @@
   </main>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch } from "vue";
 import RosLib from "roslib";
-import init, { convert } from "../api/fast-image-converter/fast_image_converter";
 
 const imageCanvas = ref<HTMLCanvasElement>();
 
@@ -79,9 +78,6 @@ function drawCameraImage(_message: RosLib.Message){
   const width = Number(_width)
   const height = Number(_height)
   const image_base64 = image_data.substring(_width.length + _height.length + 2);
-  //const image_base64 = message.data
-  //const width = 500
-  //const height = 500
 
   if (!imageCanvas.value) throw new Error("imageCanvas is undefined");
   imageCanvas.value.width = width;
@@ -89,12 +85,6 @@ function drawCameraImage(_message: RosLib.Message){
   
   const ctx = imageCanvas.value.getContext("2d");
   if (!ctx) throw new Error("ctx is null");
-  
-  /*const binaryString = atob(message.data);
-  const convertedArray = convert(binaryString, width, height, PIXEL_MODULO)
-  const clampedArray = new Uint8ClampedArray(convertedArray);
-  const imageData = new ImageData(clampedArray, width, height)
-  ctx.putImageData(imageData, 0, 0);*/
 
   const img = new Image();
   img.src = `data:image/jpeg;base64,${image_base64}`;
@@ -107,7 +97,6 @@ function drawCameraImage(_message: RosLib.Message){
 }
 
 onMounted(async () => {
-  await init()
   watch(imageTopic, (topic) => {
     if( !topic ) return
     topic.subscribe(drawCameraImage);
