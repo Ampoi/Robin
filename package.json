@@ -4,13 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "bun showQRcode.ts & vite --host",
     "build:converter": "cd ./fast-image-converter && wasm-pack build --target web --out-name fast_image_converter --out-dir pkg && cd .. && cp -r fast-image-converter/pkg/* src/api/fast-image-converter",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
+    "@types/qrcode": "^1.5.5",
+    "qrcode": "^1.5.4",
     "roslib": "^1.4.1",
     "vue": "^3.5.13"
   },
