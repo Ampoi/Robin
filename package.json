@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun showQRcode.ts & vite --host",
+    "generate-pwa-assets": "pwa-assets-generator",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
