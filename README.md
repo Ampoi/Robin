@@ -2,7 +2,7 @@
   <img
     height="300"
     alt="Robin Logo"
-    src="robin_client/client/public/icon.svg"/>
+    src="client/public/icon.svg"/>
 </p>
 
 # Robin

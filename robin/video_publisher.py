@@ -6,14 +6,16 @@ import cv2
 from cv_bridge import CvBridge
 import base64
 
-class ImageBase64Publisher(Node):
+IMAGE_SUBSCRIBE_TOPIC_NAME = '/camera/color/image_raw'
+
+class VideoPublisher(Node):
     def __init__(self):
-        super().__init__('image_base64_publisher')
+        super().__init__('video_publisher')
 
         # Image Subscriber
         self.image_subscriber = self.create_subscription(
             Image,
-            '/camera/color/image_raw',
+            IMAGE_SUBSCRIBE_TOPIC_NAME,
             self.image_callback,
             10
         )
@@ -23,6 +25,7 @@ class ImageBase64Publisher(Node):
 
         # Initialize CvBridge
         self.bridge = CvBridge()
+        print("Video Publisher Node Initialized")
 
     def image_callback(self, msg):
         # Convert ROS Image message to OpenCV image
@@ -55,11 +58,11 @@ def main(args=None):
     rclpy.init(args=args)
 
     # Create and spin the node
-    image_base64_publisher = ImageBase64Publisher()
-    rclpy.spin(image_base64_publisher)
+    video_publisher = VideoPublisher()
+    rclpy.spin(video_publisher)
 
     # Shutdown the node
-    image_base64_publisher.destroy_node()
+    video_publisher.destroy_node()
     rclpy.shutdown()
 
 
