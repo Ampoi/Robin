@@ -11,11 +11,35 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'PyLoT Controller',
-        short_name: 'PyLoT Joy',
-        theme_color: '#000000',       // テーマカラーを黒に設定
-        background_color: '#000000',  // スプラッシュスクリーンの背景を黒に設定
-        display: 'standalone'
+        name: 'Robin',
+        short_name: 'Robin',
+        theme_color: '#000000',
+        background_color: '#000000',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'pwa-64x64.png',
+            sizes: '64x64',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
       },
     })
   ],
