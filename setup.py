@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'client = robin.client:main',
-            'video_publisher = robin.video_publisher:main'
+            'video_publisher = robin.video_publisher.index:main'
         ],
     },
 )
