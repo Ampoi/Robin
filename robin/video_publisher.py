@@ -12,7 +12,9 @@ import asyncio
 from av import VideoFrame
 from aiortc import VideoStreamTrack
 from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
 
+IMAGE_SUBSCRIBE_TOPIC_NAME = "/d455/camera/image_raw"
 
 def runServer(on_shutdown, offer):
     app = web.Application()
@@ -42,17 +44,28 @@ pcs = set()
 latest_image_msg = None
 
 class OpenCVCameraStreamTrack(VideoStreamTrack):
-    def __init__(self):
+    def __init__(self, bridge):
         super().__init__()
+        self.bridge = bridge  # Accept CvBridge as a parameter
+        self.logger = logging.getLogger("OpenCVCameraStreamTrack")  # Set up a logger
 
     async def recv(self):
         pts, time_base = await self.next_timestamp()
 
         try:
-          frame = self.bridge.imgmsg_to_cv2(latest_image_msg, desired_encoding='bgr8')
+            frame = None
+            if latest_image_msg:
+                frame = self.bridge.imgmsg_to_cv2(latest_image_msg, desired_encoding='bgr8')
+            else:
+                frame = cv2.Mat(512, 512, cv2.CV_8UC3)
+            
+            if frame is None:
+                ValueError("frame is still none")
         except Exception as e:
-          self.get_logger().error(f"Error converting image: {e}")
-          return
+            self.logger.error(f"Error converting image: {e}")  # Log the error
+            return
+        
+        self.logger.info(frame)
 
         video_frame = VideoFrame.from_ndarray(frame, format="rgb24")
         video_frame.pts = pts
@@ -69,7 +82,7 @@ async def offer(request):
     pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=[]))
     pcs.add(pc)
 
-    pc.addTrack(OpenCVCameraStreamTrack())
+    pc.addTrack(OpenCVCameraStreamTrack(bridge=CvBridge()))  # Pass CvBridge instance
 
     await pc.setRemoteDescription(offer)
     answer = await pc.createAnswer()
@@ -102,6 +115,7 @@ class Client(Node):
         runServer(on_shutdown, offer)
 
     def image_callback(self, msg):
+        global latest_image_msg  # Ensure you're using the global variable
         latest_image_msg = msg
 
 
