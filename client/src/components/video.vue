@@ -38,7 +38,7 @@ onMounted(() => {
   
     if( !pc.localDescription ) throw new Error("Local description is null");
   
-    const response = await fetch("http://0.0.0.0:8080/offer", {
+    const response = await fetch(`http://${window.location.hostname}:8080/offer`, {
       method: "POST",
       body: JSON.stringify({
         sdp: pc.localDescription.sdp,

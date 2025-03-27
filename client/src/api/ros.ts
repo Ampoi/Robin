@@ -20,5 +20,7 @@ export function createRos() {
     console.log("👋 WebSocket Closed!");
   });
 
+  setInterval(() => { console.log(ros.isConnected) }, 1000)
+
   return { ros }
 }
