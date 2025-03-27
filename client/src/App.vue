@@ -36,10 +36,7 @@
           :isVideo="true"/>
         <Settings/>
       </div>
-      <Video
-        :ros
-        :videoTopicName
-        class="grow -mt-2"/>
+      <Video class="grow -mt-2"/>
       <DebugConsole
         :ros/>
     </div>
