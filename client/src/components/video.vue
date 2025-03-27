@@ -5,6 +5,7 @@
       autoplay
       playsinline
       muted
+      preload="none"
       class="w-full h-full object-contain" />
   </main>
 </template>
@@ -25,10 +26,12 @@ watchEffect(() => {
 onMounted(() => {
   const pc = new RTCPeerConnection();
 
+  pc.addTransceiver("video", { direction: "recvonly" });
+
   pc.ontrack = (event) => {
     incomingStream.value = event.streams[0];
   };
-  
+
   async function negotiate() {
     const offer = await pc.createOffer({
       offerToReceiveVideo: true,
