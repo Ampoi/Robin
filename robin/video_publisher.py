@@ -1,18 +1,16 @@
 from rclpy.node import Node
+from sensor_msgs.msg import Image
 import rclpy
 
 import asyncio
 import json
 import logging
-from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration
+from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, VideoStreamTrack
 from aiohttp import web
 import aiohttp_cors
 import cv2
-import asyncio
-from av import VideoFrame
-from aiortc import VideoStreamTrack
 from cv_bridge import CvBridge
-from sensor_msgs.msg import Image
+from av import VideoFrame
 
 IMAGE_SUBSCRIBE_TOPIC_NAME = "/d455/camera/image_raw"
 
@@ -41,31 +39,16 @@ def runServer(on_shutdown, offer):
 logging.basicConfig(level=logging.INFO)
 pcs = set()
 
-latest_image_msg = None
+frame = None
 
 class OpenCVCameraStreamTrack(VideoStreamTrack):
-    def __init__(self, bridge):
+    def __init__(self):
         super().__init__()
-        self.bridge = bridge  # Accept CvBridge as a parameter
-        self.logger = logging.getLogger("OpenCVCameraStreamTrack")  # Set up a logger
 
     async def recv(self):
-        pts, time_base = await self.next_timestamp()
+        global frame
 
-        try:
-            frame = None
-            if latest_image_msg:
-                frame = self.bridge.imgmsg_to_cv2(latest_image_msg, desired_encoding='bgr8')
-            else:
-                frame = cv2.Mat(512, 512, cv2.CV_8UC3)
-            
-            if frame is None:
-                ValueError("frame is still none")
-        except Exception as e:
-            self.logger.error(f"Error converting image: {e}")  # Log the error
-            return
-        
-        self.logger.info(frame)
+        pts, time_base = await self.next_timestamp()
 
         video_frame = VideoFrame.from_ndarray(frame, format="rgb24")
         video_frame.pts = pts
@@ -82,7 +65,7 @@ async def offer(request):
     pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=[]))
     pcs.add(pc)
 
-    pc.addTrack(OpenCVCameraStreamTrack(bridge=CvBridge()))  # Pass CvBridge instance
+    pc.addTrack(OpenCVCameraStreamTrack())
 
     await pc.setRemoteDescription(offer)
     answer = await pc.createAnswer()
@@ -101,23 +84,25 @@ async def on_shutdown(app):
     await asyncio.gather(*coros)
     pcs.clear()
 
-
 class Client(Node):
     def __init__(self):
         super().__init__("client")
-        print("Video Publisher Node Initialized")
 
         self.image_subscriber = self.create_subscription(
-            Image, IMAGE_SUBSCRIBE_TOPIC_NAME, self.image_callback, 10
+            Image, IMAGE_SUBSCRIBE_TOPIC_NAME, self.update_latest_frame, 10
         )
 
-        print("start webrtc server")
-        runServer(on_shutdown, offer)
+        self.bridge = CvBridge()
 
-    def image_callback(self, msg):
-        global latest_image_msg  # Ensure you're using the global variable
-        latest_image_msg = msg
+        print("Video Publisher Node Initialized")
 
+    def update_latest_frame(self, msg):
+        global frame
+        last_frame_is_none = frame is None
+        frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
+        if last_frame_is_none:
+            print("Initialize server with the first frame")
+            runServer(on_shutdown, offer)
 
 def main(args=None):
     rclpy.init(args=args)
