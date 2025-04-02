@@ -9,7 +9,7 @@ from av import VideoFrame
 import numpy as np
 import time
 
-IMAGE_SUBSCRIBE_TOPIC_NAME = "/d455/camera/image_raw"
+IMAGE_SUBSCRIBE_TOPIC_NAME = "/d455/camera/color/image_raw"
 
 def runServer(on_shutdown, offer):
     app = web.Application()
@@ -23,6 +23,8 @@ def runServer(on_shutdown, offer):
                 allow_credentials=True,
                 expose_headers="*",
                 allow_headers="*",
+                allow_methods="*",
+                allow_origin="*"
             )
         },
     )
@@ -89,6 +91,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 import rclpy
 from cv_bridge import CvBridge
+import threading
 
 class Client(Node):
     def __init__(self):
@@ -99,13 +102,14 @@ class Client(Node):
         )
 
         self.bridge = CvBridge()
+        self.logger = logging.getLogger("Client")
 
-        print("Video Publisher Node Initialized")
-        
-        runServer(on_shutdown, offer)
+        self.logger.info("Video Publisher Node Initialized")
+        threading.Thread(target=runServer, args=(on_shutdown, offer), daemon=True).start()
 
     def update_latest_frame(self, msg):
         global frame
+        self.logger.info("Received image")
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
 
 def main(args=None):
