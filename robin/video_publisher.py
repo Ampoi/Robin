@@ -1,7 +1,3 @@
-from rclpy.node import Node
-from sensor_msgs.msg import Image
-import rclpy
-
 import asyncio
 import json
 import logging
@@ -9,8 +5,9 @@ from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, V
 from aiohttp import web
 import aiohttp_cors
 import cv2
-from cv_bridge import CvBridge
 from av import VideoFrame
+import numpy as np
+import time
 
 IMAGE_SUBSCRIBE_TOPIC_NAME = "/d455/camera/image_raw"
 
@@ -39,7 +36,9 @@ def runServer(on_shutdown, offer):
 logging.basicConfig(level=logging.INFO)
 pcs = set()
 
-frame = None
+width = 640
+height = 480
+frame = np.zeros((height, width, 3), np.uint8) #初期の画像
 
 class OpenCVCameraStreamTrack(VideoStreamTrack):
     def __init__(self):
@@ -84,6 +83,13 @@ async def on_shutdown(app):
     await asyncio.gather(*coros)
     pcs.clear()
 
+###
+
+from rclpy.node import Node
+from sensor_msgs.msg import Image
+import rclpy
+from cv_bridge import CvBridge
+
 class Client(Node):
     def __init__(self):
         super().__init__("client")
@@ -95,14 +101,12 @@ class Client(Node):
         self.bridge = CvBridge()
 
         print("Video Publisher Node Initialized")
+        
+        runServer(on_shutdown, offer)
 
     def update_latest_frame(self, msg):
         global frame
-        last_frame_is_none = frame is None
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
-        if last_frame_is_none:
-            print("Initialize server with the first frame")
-            runServer(on_shutdown, offer)
 
 def main(args=None):
     rclpy.init(args=args)
