@@ -1,55 +1,56 @@
-from rclpy.node import Node
-import rclpy
-
 import asyncio
 import json
 import logging
-from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration
+from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, VideoStreamTrack
 from aiohttp import web
 import aiohttp_cors
 import cv2
-import asyncio
 from av import VideoFrame
-from aiortc import VideoStreamTrack
+import numpy as np
+import time
+
+IMAGE_SUBSCRIBE_TOPIC_NAME = "/d455/camera/color/image_raw"
 
 def runServer(on_shutdown, offer):
-  app = web.Application()
-  app.on_shutdown.append(on_shutdown)
-  app.router.add_post("/offer", offer)
+    app = web.Application()
+    app.on_shutdown.append(on_shutdown)
+    app.router.add_post("/offer", offer)
 
-  cors = aiohttp_cors.setup(
-      app,
-      defaults={
-          "*": aiohttp_cors.ResourceOptions(
-              allow_credentials=True,
-              expose_headers="*",
-              allow_headers="*",
-          )
-      },
-  )
+    cors = aiohttp_cors.setup(
+        app,
+        defaults={
+            "*": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers="*",
+                allow_headers="*",
+                allow_methods="*",
+                allow_origin="*"
+            )
+        },
+    )
 
-  for route in list(app.router.routes()):
-      cors.add(route)
+    for route in list(app.router.routes()):
+        cors.add(route)
 
-  web.run_app(app, port=8080)
+    web.run_app(app, port=8080)
+
 
 logging.basicConfig(level=logging.INFO)
 pcs = set()
 
+width = 640
+height = 480
+frame = np.zeros((height, width, 3), np.uint8) #初期の画像
+
 class OpenCVCameraStreamTrack(VideoStreamTrack):
     def __init__(self):
         super().__init__()
-        self.cap = cv2.VideoCapture(0)  # カメラ番号 0
 
     async def recv(self):
+        global frame
+
         pts, time_base = await self.next_timestamp()
 
-        ret, frame = self.cap.read()
-        if not ret:
-            raise RuntimeError("カメラフレームの取得に失敗しました")
-
-        # OpenCVのBGRをRGBへ変換してVideoFrameに変換
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         video_frame = VideoFrame.from_ndarray(frame, format="rgb24")
         video_frame.pts = pts
         video_frame.time_base = time_base
@@ -62,9 +63,7 @@ async def offer(request):
     params = await request.json()
     offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
 
-    pc = RTCPeerConnection(configuration=RTCConfiguration(
-      iceServers=[]
-    ))
+    pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=[]))
     pcs.add(pc)
 
     pc.addTrack(OpenCVCameraStreamTrack())
@@ -80,26 +79,48 @@ async def offer(request):
         ),
     )
 
+
 async def on_shutdown(app):
     coros = [pc.close() for pc in pcs]
     await asyncio.gather(*coros)
     pcs.clear()
 
-class Client(Node):
-  def __init__(self):
-    super().__init__('client')
-    print("Video Publisher Node Initialized")
+###
 
-    runServer(on_shutdown, offer)
+from rclpy.node import Node
+from sensor_msgs.msg import Image
+import rclpy
+from cv_bridge import CvBridge
+import threading
+
+class Client(Node):
+    def __init__(self):
+        super().__init__("client")
+
+        self.image_subscriber = self.create_subscription(
+            Image, IMAGE_SUBSCRIBE_TOPIC_NAME, self.update_latest_frame, 10
+        )
+
+        self.bridge = CvBridge()
+        self.logger = logging.getLogger("Client")
+
+        self.logger.info("Video Publisher Node Initialized")
+        threading.Thread(target=runServer, args=(on_shutdown, offer), daemon=True).start()
+
+    def update_latest_frame(self, msg):
+        global frame
+        self.logger.info("Received image")
+        frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding="rgb8")
 
 def main(args=None):
-  rclpy.init(args=args)
-  
-  client = Client()
-  rclpy.spin(client)
-  
-  client.destroy_node()
-  rclpy.shutdown()
+    rclpy.init(args=args)
 
-if __name__ == '__main__':
-  main()
+    client = Client()
+    rclpy.spin(client)
+
+    client.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
