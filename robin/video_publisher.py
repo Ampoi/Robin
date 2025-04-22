@@ -12,27 +12,40 @@ import time
 IMAGE_SUBSCRIBE_TOPIC_NAME = "/d455/camera/color/image_raw"
 
 def runServer(on_shutdown, offer):
-    app = web.Application()
-    app.on_shutdown.append(on_shutdown)
-    app.router.add_post("/offer", offer)
+    async def start_server():
+        app = web.Application()
+        app.on_shutdown.append(on_shutdown)
+        app.router.add_post("/offer", offer)
 
-    cors = aiohttp_cors.setup(
-        app,
-        defaults={
-            "*": aiohttp_cors.ResourceOptions(
-                allow_credentials=True,
-                expose_headers="*",
-                allow_headers="*",
-                allow_methods="*",
-                allow_origin="*"
-            )
-        },
-    )
+        cors = aiohttp_cors.setup(
+            app,
+            defaults={
+                "*": aiohttp_cors.ResourceOptions(
+                    allow_credentials=True,
+                    expose_headers="*",
+                    allow_headers="*",
+                    allow_methods="*"
+                )
+            }
+        )
+        for route in list(app.router.routes()):
+            cors.add(route)
 
-    for route in list(app.router.routes()):
-        cors.add(route)
+        runner = web.AppRunner(app)
+        await runner.setup()
 
-    web.run_app(app, port=8080)
+        site = web.TCPSite(runner, host="0.0.0.0", port=8080)
+        await site.start()
+
+        print("Server started at http://0.0.0.0:8080")
+        # keep it running
+        while True:
+            await asyncio.sleep(3600)
+
+    def thread_target():
+        asyncio.run(start_server())
+
+    threading.Thread(target=thread_target, daemon=True).start()
 
 
 logging.basicConfig(level=logging.INFO)
