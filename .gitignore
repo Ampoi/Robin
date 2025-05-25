@@ -1,2 +1,5 @@
 robin/**/__pycache__
 .qodo
+build
+install
+log
