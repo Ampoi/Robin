@@ -1,14 +1,17 @@
 <template>
-  <button
-    @click="isOpen = true"
-    class="w-full rounded-lg overflow-hidden border border-white flex flex-row items-center p-0.5 text-white">
-    <div class="border border-white border-dotted size-6 rounded-md grid place-content-center">
-      <Icon
-        icon="fa6-solid:terminal"
-        class="text-[12px]"/>
-    </div>
-    <p class="min-w-0 shrink max-w-full first-letter:px-2 text-sm font-mono whitespace-nowrap overflow-hidden text-ellipsis">{{ logs[0] }}</p>
-  </button>
+  <div class="w-full">
+    <button
+      @click="isOpen = true"
+      class="w-full rounded-lg overflow-hidden border border-white flex flex-row items-center p-0.5 text-white">
+      <div class="border border-white border-dotted size-6 rounded-md grid place-content-center">
+        <Icon
+          icon="fa6-solid:terminal"
+          class="text-[12px]"/>
+      </div>
+      <p class="min-w-0 shrink max-w-full first-letter:px-2 text-sm font-mono whitespace-nowrap overflow-hidden text-ellipsis">{{ logs[0] }}</p>
+    </button>
+    <div class="h-3 w-full rounded-lg border border-white border-dotted border-t-0 rounded-t-none -mt-2"/>
+  </div>
   <Modal
     v-model:open="isOpen"
     title="Logs">

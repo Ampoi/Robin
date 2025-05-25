@@ -29,16 +29,15 @@
         v-model:position="controls.leftStick"/>
     </div>
     <div class="grow min-w-0 flex flex-col gap-2 items-center">
-      <div class="flex flex-row gap-2">
-        <TopicNameSelector
-          v-model="videoTopicName"
-          :ros
-          :isVideo="true"/>
-        <Settings/>
-      </div>
       <Video class="grow -mt-2"/>
-      <DebugConsole
-        :ros/>
+      <div class="flex flex-row gap-2 w-full items-center">
+        <DebugConsole
+          :ros
+          class="grow"/>
+        <div class="mt-1.5">
+          <Settings/>
+        </div>
+      </div>
     </div>
     <div class="flex flex-col gap-4 items-center basis-40">
       <div class="p-2 flex flex-col gap-4 w-full">
