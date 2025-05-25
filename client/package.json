@@ -14,7 +14,8 @@
     "@types/qrcode": "^1.5.5",
     "qrcode": "^1.5.4",
     "roslib": "^1.4.1",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "vue-router": "4"
   },
   "devDependencies": {
     "@iconify/vue": "^4.3.0",
