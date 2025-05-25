@@ -2,18 +2,16 @@ import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
 
-import { createRouter, createMemoryHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import Controller from './pages/controller.vue'
-//import Face from './pages/face.vue'
-
-const routes = [
-  { path: '/', component: Controller },
-//  { path: '/face', component: Face },
-]
+import Face from './pages/face.vue'
 
 const router = createRouter({
-  history: createMemoryHistory(),
-  routes,
+  history: createWebHistory(),
+  routes: [
+    { path: '/', component: Controller, name: "controller" },
+    { path: '/face', component: Face, name: "face" },
+  ],
 })
 
 createApp(App)
